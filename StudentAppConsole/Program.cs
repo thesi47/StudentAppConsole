@@ -1,319 +1,378 @@
-﻿using System.Transactions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StudentAppConsole
 {
-    public class Program
+    internal class Program
     {
         static List<Student> students = new List<Student>();
-        static void Main(string[] args)
+
+        static void Main()
         {
             while (true)
             {
-
-
                 Console.Clear();
-                Console.WriteLine("Welcome to Student Console Manager...!");
-                Console.WriteLine("=======STUDENT MANAGEMENT SYSTEM=======");
-                Console.WriteLine();
 
+                Console.WriteLine("===== Student Management System =====");
                 Console.WriteLine("1. Add Student");
                 Console.WriteLine("2. Display All Students");
                 Console.WriteLine("3. Update Student");
                 Console.WriteLine("4. Remove Student");
                 Console.WriteLine("5. Search by Student ID");
                 Console.WriteLine("6. Search by Student Name");
-                Console.WriteLine("7. Show Highest Mark, Lowest Mark, Average Mark");
+                Console.WriteLine("7. Show Highest Average, Lowest Average, Average Average");
                 Console.WriteLine("8. Display Passed Students");
                 Console.WriteLine("9. Display Failed Students");
-                Console.WriteLine("10. Display Students By grade");
+                Console.WriteLine("10. Display Students By Grade");
                 Console.WriteLine("11. Filter Students Above Average");
-                Console.WriteLine("12. Sort Students By Mark");
+                Console.WriteLine("12. Sort Students By Average");
                 Console.WriteLine("13. Display Top Performer");
                 Console.WriteLine("0. Exit");
-                Console.WriteLine();
-                Console.Write("Enter Choice: ");
-                var choice = Console.ReadLine();
+
+                Console.Write("\nChoose Option: ");
+
+                int choice;
+
+                if (!int.TryParse(Console.ReadLine(), out choice))
+                {
+                    Console.WriteLine("Invalid Input.");
+                    Console.WriteLine("Press Any Key To Continue...");
+                    Console.ReadKey();
+                    continue;
+                }
+
                 switch (choice)
                 {
-                    case "1":
+                    case 1:
                         AddStudent();
                         break;
 
-                    case "2":
-                        DisplayStudents();
+                    case 2:
+                        DisplayStudents(students);
                         break;
 
-                    case "3":
+                    case 3:
                         UpdateStudent();
                         break;
 
-                    case "4":
+                    case 4:
                         RemoveStudent();
                         break;
 
-                    case "5":
+                    case 5:
                         SearchById();
                         break;
 
-                    case "6":
+                    case 6:
                         SearchByName();
                         break;
 
-                    case "7":
+                    case 7:
                         ShowStatistics();
                         break;
 
-                    case "8":
-                        ShowPassedStudents();
+                    case 8:
+                        DisplayPassedStudents();
                         break;
 
-                    case "9":
-                        ShowFailedStudents();
+                    case 9:
+                        DisplayFailedStudents();
                         break;
 
-                    case "10":
-                        ShowByGrade();
+                    case 10:
+                        DisplayByGrade();
                         break;
 
-                    case "11":
-                        AboveAverage();
+                    case 11:
+                        FilterAboveAverage();
                         break;
 
-                    case "12":
-                        SortByMark();
+                    case 12:
+                        SortByAverage();
                         break;
 
-                    case "13":
-                        TopPerformer();
+                    case 13:
+                        DisplayTopPerformer();
                         break;
 
-                    case "0":
+                    case 0:
                         return;
 
                     default:
                         Console.WriteLine("Invalid Choice.");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
                         break;
                 }
             }
         }
+
         static void AddStudent()
         {
-            Console.Write("Enter Student ID: ");
+            Student student = new Student();
+            Console.Clear();
+
+            Console.Write("ID : ");
+            student.Id = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Name : ");
+            student.Name = Console.ReadLine()!;
+
+            Console.Write("Physics : ");
+            student.Physics = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Chemistry : ");
+            student.Chemistry = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Math : ");
+            student.Math = Convert.ToInt32(Console.ReadLine());
+
+            student.Total = student.Physics + student.Chemistry + student.Math;
+            student.Average = student.Total / 3.0;
+
+            CalculateResult(student);
+
+            students.Add(student);
+
+            Console.WriteLine("\nStudent Added Successfully.");
+            Console.ReadKey();
+        }
+
+        static void CalculateResult(Student student)
+        {
+            double avg = student.Average;
+            Console.Clear();
+
+            if (avg >= 80)
+            {
+                student.LetterGrade = "A+";
+                student.CGPA = 4.00;
+            }
+            else if (avg >= 70)
+            {
+                student.LetterGrade = "A";
+                student.CGPA = 3.75;
+            }
+            else if (avg >= 60)
+            {
+                student.LetterGrade = "A-";
+                student.CGPA = 3.50;
+            }
+            else if (avg >= 50)
+            {
+                student.LetterGrade = "B";
+                student.CGPA = 3.00;
+            }
+            else if (avg >= 40)
+            {
+                student.LetterGrade = "C";
+                student.CGPA = 2.00;
+            }
+            else
+            {
+                student.LetterGrade = "F";
+                student.CGPA = 0;
+            }
+
+            student.IsPassed = avg >= 40;
+        }
+
+        static void DisplayStudents(List<Student> list)
+        {
+            Console.Clear();
+            if (list.Count == 0)
+            {
+                Console.WriteLine("No Student Found.");
+                Console.ReadKey();
+                return;
+            }
+            Console.WriteLine($"\tID\tName\t\tTotal Marks\t\tAverage Marks\t\tLetterGrade\t\tCGPA");
+            Console.WriteLine("================================================================================================================");
+            foreach (Student s in list)
+            {
+                Console.WriteLine($"\t{s.Id}\t{s.Name}\t\t{s.Total}\t\t\t{s.Average:F2}\t\t\t{s.LetterGrade}\t\t\t{s.CGPA}");
+            }
+            Console.WriteLine("================================================================================================================");
+
+            Console.ReadKey();
+        }
+
+        static void UpdateStudent()
+        {
+            Console.Clear();
+            Console.Write("Enter ID : ");
             int id = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine();
-            Console.Write("Enter Student Name: ");
+
+            Student student = students.FirstOrDefault(x => x.Id == id)!;
+
+            if (student == null)
+            {
+                Console.WriteLine("Student Not Found.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.Write("New Name : ");
+            student.Name = Console.ReadLine()!;
+
+            Console.Write("Physics : ");
+            student.Physics = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Chemistry : ");
+            student.Chemistry = Convert.ToInt32(Console.ReadLine());
+
+            Console.Write("Math : ");
+            student.Math = Convert.ToInt32(Console.ReadLine());
+
+            student.Total = student.Physics + student.Chemistry + student.Math;
+            student.Average = student.Total / 3.0;
+
+            CalculateResult(student);
+
+            Console.WriteLine("Updated Successfully.");
+            Console.ReadKey();
+        }
+
+        static void RemoveStudent()
+        {
+            Console.Clear();
+            Console.Write("Enter ID : ");
+            int id = Convert.ToInt32(Console.ReadLine());
+
+            Student student = students.FirstOrDefault(x => x.Id == id)!;
+
+            if (student == null)
+            {
+                Console.WriteLine("Student Not Found.");
+            }
+            else
+            {
+                students.Remove(student);
+                Console.WriteLine("Removed Successfully.");
+            }
+
+            Console.ReadKey();
+        }
+
+        static void SearchById()
+        {
+            Console.Clear();
+            Console.Write("Enter ID : ");
+            int id = Convert.ToInt32(Console.ReadLine());
+
+            Student student = students.FirstOrDefault(x => x.Id == id)!;
+
+            if (student == null)
+            {
+                Console.WriteLine("Not Found.");
+                Console.ReadKey();
+                return;
+            }
+
+            DisplayStudents(new List<Student> { student });
+        }
+
+        static void SearchByName()
+        {
+            Console.Clear();
+            Console.Write("Enter Name : ");
             string name = Console.ReadLine()!;
-            Console.WriteLine();
-            Console.Write("Enter Chemistry Mark");
-            int chemistry = Convert.ToInt32(Console.ReadLine());
-            Console.Write("Enter Physics Mark");
-            int physics = Convert.ToInt32(Console.ReadLine());
-            Console.Write("Enter Math Mark");
-            int math = Convert.ToInt32(Console.ReadLine());
 
+            List<Student> result = students
+                .Where(x => x.Name.ToLower().Contains(name.ToLower()))
+                .ToList();
 
-            students.Add(new Student
+            DisplayStudents(result);
+        }
+
+        static void ShowStatistics()
+        {
+            Console.Clear();
+            if (students.Count == 0)
             {
-                Id = id,
-                Name = name,
-                Chemistry = chemistry,
-                Physics = physics,
-                Math = math
-
-            });
-            Console.WriteLine($"Student {name} added successfully");
-            static void DisplayStudents()
+                Console.WriteLine("No Data.");
+            }
+            else
             {
-                if (!students.Any())
-                {
-                    Console.WriteLine("No Students Found.");
-                }
-                else
-                {
-                    foreach (var s in students)
-                    {
-                        Console.WriteLine($"{s.Id}\t{s.Name}\t{s.Mark}\t{s.Grade}");
-                    }
-                }
-                
+                Console.WriteLine($"Highest Average : {students.Max(x => x.Average):F2}");
+                Console.WriteLine($"Lowest Average : {students.Min(x => x.Average):F2}");
+                Console.WriteLine($"Average Average : {students.Average(x => x.Average):F2}");
             }
 
-            static void UpdateStudent()
+            Console.ReadKey();
+        }
+
+        static void DisplayPassedStudents()
+        {
+            Console.Clear();
+            DisplayStudents(students.Where(x => x.IsPassed).ToList());
+        }
+
+        static void DisplayFailedStudents()
+        {
+            DisplayStudents(students.Where(x => !x.IsPassed).ToList());
+        }
+
+        static void DisplayByGrade()
+        {
+            Console.Clear();
+            Console.Write("Enter Grade : ");
+            string grade = Console.ReadLine()!;
+
+            List<Student> result = students
+                .Where(x => x.LetterGrade.Equals(grade, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            DisplayStudents(result);
+        }
+
+        static void FilterAboveAverage()
+        {
+            Console.Clear();
+            if (students.Count == 0)
             {
-                Console.Write("Enter Student ID: ");
-                int id = Convert.ToInt32(Console.ReadLine());
-
-                Student student = students.FirstOrDefault(s => s.Id == id);
-
-                if (student == null)
-                {
-                    Console.WriteLine("Student Not Found.");
-                }
-                else
-                {
-                    Console.Write("New Name: ");
-                    student.Name = Console.ReadLine();
-
-                    Console.Write("New Mark: ");
-                    student.Mark = Convert.ToDouble(Console.ReadLine());
-
-                    Console.WriteLine("Updated Successfully.");
-                }
-
-                
+                Console.WriteLine("No Data.");
+                Console.ReadKey();
+                return;
             }
 
-            static void RemoveStudent()
+            double avg = students.Average(x => x.Average);
+
+            List<Student> result = students
+                .Where(x => x.Average > avg)
+                .ToList();
+
+            Console.WriteLine($"Overall Average = {avg:F2}");
+
+            DisplayStudents(result);
+        }
+
+        static void SortByAverage()
+        {
+            Console.Clear();
+            List<Student> result = students
+                .OrderByDescending(x => x.Average)
+                .ToList();
+
+            DisplayStudents(result);
+        }
+
+        static void DisplayTopPerformer()
+        {
+            Console.Clear();
+            if (students.Count == 0)
             {
-                Console.Write("Enter Student ID: ");
-                int id = Convert.ToInt32(Console.ReadLine());
-
-                Student student = students.FirstOrDefault(s => s.Id == id);
-
-                if (student != null)
-                {
-                    students.Remove(student);
-                    Console.WriteLine("Student Removed.");
-                }
-                else
-                {
-                    Console.WriteLine("Student Not Found.");
-                }
-
-                
+                Console.WriteLine("No Data.");
+                Console.ReadKey();
+                return;
             }
 
-            static void SearchById()
-            {
-                Console.Write("Enter ID: ");
-                int id = Convert.ToInt32(Console.ReadLine());
+            Student top = students
+                .OrderByDescending(x => x.Average)
+                .First();
 
-                var s = students.FirstOrDefault(x => x.Id == id);
-
-                if (s == null)
-                    Console.WriteLine("Student Not Found.");
-                else
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark} {s.Grade}");
-
-                
-            }
-
-            static void SearchByName()
-            {
-                Console.Write("Enter Name: ");
-                string name = Console.ReadLine();
-
-                var result = students.Where(x => x.Name.ToLower().Contains(name.ToLower()));
-
-                foreach (var s in result)
-                {
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark} {s.Grade}");
-                }
-
-                
-            }
-
-            static void ShowStatistics()
-            {
-                if (!students.Any())
-                {
-                    Console.WriteLine("No Data.");
-                }
-                else
-                {
-                    Console.WriteLine($"Highest Mark : {students.Max(x => x.Mark)}");
-                    Console.WriteLine($"Lowest Mark  : {students.Min(x => x.Mark)}");
-                    Console.WriteLine($"Average Mark : {students.Average(x => x.Mark):F2}");
-                }
-
-                
-            }
-
-            static void ShowPassedStudents()
-            {
-                foreach (var s in students.Where(x => x.IsPassed))
-                {
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark}");
-                }
-
-                
-            }
-
-            static void ShowFailedStudents()
-            {
-                foreach (var s in students.Where(x => !x.IsPassed))
-                {
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark}");
-                }
-
-                
-            }
-
-            static void ShowByGrade()
-            {
-                Console.Write("Enter Grade: ");
-                string grade = Console.ReadLine().ToUpper();
-
-                var result = students.Where(x => x.Grade.ToUpper() == grade);
-
-                foreach (var s in result)
-                {
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark}");
-                }
-
-                
-            }
-
-            static void AboveAverage()
-            {
-                if (!students.Any())
-                {
-                    Console.WriteLine("No Data.");
-                }
-                else
-                {
-                    double avg = students.Average(x => x.Mark);
-
-                    Console.WriteLine($"Average = {avg:F2}\n");
-
-                    foreach (var s in students.Where(x => x.Mark > avg))
-                    {
-                        Console.WriteLine($"{s.Id} {s.Name} {s.Mark}");
-                    }
-                }
-
-                
-            }
-
-            static void SortByMark()
-            {
-                foreach (var s in students.OrderByDescending(x => x.Mark))
-                {
-                    Console.WriteLine($"{s.Id} {s.Name} {s.Mark}");
-                }
-
-                
-            }
-
-            static void TopPerformer()
-            {
-                if (!students.Any())
-                {
-                    Console.WriteLine("No Students.");
-                }
-                else
-                {
-                    var top = students.OrderByDescending(x => x.Mark).First();
-
-                    Console.WriteLine("Top Performer");
-                    Console.WriteLine($"ID    : {top.Id}");
-                    Console.WriteLine($"Name  : {top.Name}");
-                    Console.WriteLine($"Mark  : {top.Mark}");
-                    Console.WriteLine($"Grade : {top.Grade}");
-                }
-
-                
-            }
+            DisplayStudents(new List<Student> { top });
         }
     }
 }
