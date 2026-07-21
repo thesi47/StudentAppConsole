@@ -32,16 +32,8 @@ namespace StudentAppConsole
 
                 Console.Write("\nChoose Option: ");
 
-                int choice;
-
-                if (!int.TryParse(Console.ReadLine(), out choice))
-                {
-                    Console.WriteLine("Invalid Input.");
-                    Console.WriteLine("Press Any Key To Continue...");
-                    Console.ReadKey();
-                    continue;
-                }
-
+                int choice = Convert.ToInt32(Console.ReadLine());
+                
                 switch (choice)
                 {
                     case 1:
